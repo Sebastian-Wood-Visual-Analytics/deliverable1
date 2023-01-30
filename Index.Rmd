@@ -1,0 +1,130 @@
+---
+title: "Visual - Analytics 1st Deliverable"
+output:
+  html_document:
+    df_print: paged
+---
+
+#1. We import the LSMS-ISA Nigeria Wave 3 Dataset from my personal repository
+```{r}
+library(haven)
+nigeria_w3<-read_dta("https://github.com/Sebastian-Wood-Visual-Analytics/deliverable1/raw/main/Nigeria_GHS_W3_household_variables.dta")
+View(nigeria_w3)
+```
+
+#2. #Select some of the variables and create a new Dataset
+```{r}
+
+library(tidyverse)
+nigeria_w3 <- select(nigeria_w3, hhid, zone, rural, daily_percap_cons, months_food_insec)
+```
+
+#3. Data Types of each variable:
+```{r}
+names(nigeria_w3)
+```
+
+#4.Data types of each variable
+```{r}
+#this 'width = 70,strict.width='cut' means
+# you do not want to see more than 70 characters per row.
+
+str(nigeria_w3,width = 70,strict.width='cut')
+#You see different data types in the result: num (numbers in R when decimal values are detected). The ones that say chr are strings. You see several variables identified as factor or ordered factor, which are categorical variables.
+```
+
+
+We start constructing the Univariate Plot months_food_insec
+```{r}
+#You can not get a clear idea of what a data table has, so a simple frequency table is the first tool to see what these nominal data are telling us:
+# absolute values
+absoluteT=table(nigeria_w3$months_food_insec,
+                exclude = 'nothing') #include all values!
+absoluteT
+
+#The absolute count can be transformed into percent or relative frequencies:
+# relative values
+prop.table(absoluteT)
+
+#We should try using all the information possible, then it is a good idea to label the missing values:
+names(absoluteT)[8]='Unknown'
+
+#If you prefer that the range of the proportions be translated into percents you can do:
+propT=prop.table(absoluteT)*100
+#you get:
+propT
+
+# the pie plots the table:
+pie(absoluteT)
+
+#Let’s turn our pie into a bar chart using: ggplot2.
+```
+
+
+```{r}
+#The basic steps to prepare a visual in ggplot2 are: 
+#Turn the frequency table into a data frame:
+# as data frame
+(tableFreq=as.data.frame(absoluteT))
+
+#The previous frequency table can be improved:
+# renaming data frame columns
+names(tableFreq)=c("monthfoodinsecure","Count")
+# adding percents:
+tableFreq$Percent=as.vector(propT)
+# then, you have:
+tableFreq
+
+#This data frame has the three columns, we will use second for our bars.
+# b. Call the library (you may need to install it first):
+library(ggplot2)
+
+#c. Create the base object, which is not a plot, just informing the main variables:
+#base GGPLOT2 starts with a "base", telling WHAT VARIABLES TO PLOT
+base= ggplot(data = tableFreq, 
+             aes(x = monthfoodinsecure,
+                 y = Percent)) 
+
+# D. On top of the previous object, add the layer that produces the main plots (the next layers will add or customize elements in the plot):
+plot1 = base + geom_bar(fill ="gray",
+                        stat = 'identity') 
+plot1
+```
+
+
+
+```{r}
+# You have a default bar plot now. From here, you start adding more layers that will change the default.
+
+#Add titles:
+titleText='Nigeria 2015-16: Food Insecurity for Agricultural Small-Scale Producers'
+sourceText='Source: Evans School Policy Analysis and Research Group (EPAR).'
+x_axis='Number of Months Food Insecure'
+y_axis='Percentage of Total Households surveyed (%)'
+
+plot2 = plot1 + labs(title=titleText,
+                     x =x_axis,
+                     y =y_axis,
+                     caption = sourceText) 
+plot2
+
+#Add the reference lines: Let’s use the percent column and annotate to show a particular value:
+base= ggplot(data = tableFreq, 
+             aes(x = monthfoodinsecure,
+                 y = Percent)) 
+
+plot1 = base + geom_bar(fill ="gray",
+                        stat = 'identity') 
+
+plot2 = plot1 + labs(title=titleText,
+                     x =x_axis, 
+                     y = y_axis,
+                     caption = sourceText)
+
+plot3 = plot2 + geom_hline(yintercept = 25, #where
+                           linetype="dashed", 
+                           size=1.5, #thickness
+                           alpha=0.5) #transparency
+plot3
+```
+
