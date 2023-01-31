@@ -7,6 +7,7 @@ output:
 
 #1. We import the LSMS-ISA Nigeria Wave 3 Dataset from my personal repository
 ```{r}
+rm(list = ls())
 library(haven)
 nigeria_w3<-read_dta("https://github.com/Sebastian-Wood-Visual-Analytics/deliverable1/raw/main/Nigeria_GHS_W3_household_variables.dta")
 View(nigeria_w3)
@@ -121,10 +122,81 @@ plot2 = plot1 + labs(title=titleText,
                      y = y_axis,
                      caption = sourceText)
 
-plot3 = plot2 + geom_hline(yintercept = 25, #where
+plot3 = plot2 + geom_hline(yintercept = 12.5, #where
                            linetype="dashed", 
                            size=1.5, #thickness
                            alpha=0.5) #transparency
 plot3
 ```
 
+
+```{r}
+library(scales) # for "unit_format""
+
+# customize Y axis
+plot4 = plot3 + scale_y_continuous(breaks=c(0,25,50,75,100),
+                                   limits = c(0,80), 
+                                   labels=unit_format(suffix = '%')) 
+plot4
+```
+
+* Title/subtitle positions:
+```{r}
+#positions: 0 left / 1 right / 0.5 center
+plot5 = plot4 + theme(plot.caption = element_text(hjust = 0), 
+                      plot.title = element_text(hjust = 0.5))
+plot5
+```
+
+
+```{r}
+paste0(round(tableFreq$Percent,2), '%')
+# creating labels:
+LABELS=paste0(round(tableFreq$Percent,2), '%')
+###
+plot6 = plot5 + geom_text(vjust=0, #hjust if flipping
+                          size = 3,
+                          aes(y = Percent ,
+                              label = LABELS))
+plot6# + coord_flip() # wanna flip the plot?
+
+```
+
+
+
+
+You may also need to reduce more the data-ink ratio, so I recommend changing the theme to **classic**. This and the object _localesOrd_ can be added to the previous base:
+```{r}
+# redo:
+LABELS=paste0(round(tableFreq$Percent,2), '%')
+base= ggplot(data = tableFreq, 
+             aes(x = monthfoodinsecure,y = Percent)) 
+## adding these to base
+#base= base + scale_x_discrete(limits=localesOrd) 
+base= base + theme_classic()
+##
+plot1 = base + geom_bar(fill ="gray",
+                        stat = 'identity') 
+plot2 = plot1 + labs(title=titleText,
+                     x =x_axis, 
+                     y = y_axis,
+                     caption = sourceText)
+plot3 = plot2 + geom_hline(yintercept = 12.5, 
+                           linetype="dashed", 
+                           size=1.5, 
+                           alpha=0.5)
+plot4 = plot3 + scale_y_continuous(breaks=c(0,25,50,75),
+                                 limits = c(0, 80),
+                                 # expand = c(0, 0), #try?
+                            labels=unit_format(suffix = '%')) 
+
+plot5 = plot4 + theme(plot.caption = element_text(hjust = 0),
+                      plot.title = element_text(hjust = 0.5))
+
+
+plot6 = plot5 + geom_text(vjust=0, #hjust if flipping
+                          size = 4,#fontface = "bold",
+                          aes(y = Percent,
+                              label = LABELS))
+plot6 #+ coord_flip() # wanna flip the plot?
+```
