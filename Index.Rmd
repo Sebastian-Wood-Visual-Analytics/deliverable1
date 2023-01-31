@@ -5,11 +5,13 @@ output:
     df_print: paged
 ---
 
+
+
 #1. We import the LSMS-ISA Nigeria Wave 3 Dataset from my personal repository
-```{r}
+```{r getData, eval=TRUE}
+library(rio)
 rm(list = ls())
-library(haven)
-nigeria_w3<-read_dta("https://github.com/Sebastian-Wood-Visual-Analytics/deliverable1/raw/main/Nigeria_GHS_W3_household_variables.dta")
+nigeria_w3<-read.csv('https://github.com/Sebastian-Wood-Visual-Analytics/deliverable1/raw/main/NGA_W3_EPAR.csv')
 View(nigeria_w3)
 ```
 
